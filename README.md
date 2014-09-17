@@ -15,7 +15,7 @@ Look for the following additional packages:
 * SideBarEnhancements
 
 Sample of Preferences -> Settings - User
-'''
+`
 {
 	"always_show_minimap_viewport": true,
 	"bold_folder_labels": true,
@@ -57,4 +57,4 @@ Sample of Preferences -> Settings - User
 	"trim_trailing_white_space_on_save": true,
 	"wrap_width": 80
 }
-'''
+`
