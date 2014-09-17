@@ -14,6 +14,7 @@ Look for the following additional packages:
 * GitGutter
 * SideBarEnhancements
 
+Sublime settings:<br>
 Sample of Preferences -> Settings - User
 <pre><code>
 {
