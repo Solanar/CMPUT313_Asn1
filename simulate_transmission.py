@@ -1,5 +1,5 @@
 
 class Simulator():
 
-    def simulate():
+    def simulate(transmission):
         pass
