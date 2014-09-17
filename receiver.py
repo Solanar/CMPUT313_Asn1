@@ -1,5 +1,5 @@
 
 class Receiver():
 
-    def receive():
+    def receive(simulated_transmission):
         pass
