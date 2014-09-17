@@ -1,27 +1,40 @@
 import sys
 
-from .transmitter import Transmitter
-from .simulated_transmitter import Simulator
-from .receiver import Receiver
-from .statistics import Statistics
+from transmitter import Transmitter
+from simulate_transmission import Simulator
+from receiver import Receiver
+from statistics import Statistics
 
 
 def start():
-    first_arg = sys.argv[1]
-    t_arg = sys.argv[2]  # Change position
-    print("Parameters:", first_arg)
+    T = 'T'
+    First = 'First'
+    parameter_dict = {
+        First: "",
+        T: ""
+    }
 
-    for i in range(t_arg):
+    parameter_dict[First] = sys.argv[1]
+    parameter_dict[T] = int(sys.argv[2])  # Change position
+
+    print("Parameters:")
+    for name, value in parameter_dict.items():
+        print("Name:", name, "\tValue:", value)
+    print()
+
+    for i in range(parameter_dict[T]):
         transmission = Transmitter.transmit()
         simulated_transmission = Simulator.simulate(transmission)
         try:
             Receiver.receive(simulated_transmission)
-            Statistics.update("Correct")
-        except:  # create exceptions based on results
+            Statistics.update(Statistics.Correct)
+        except Exception as e:  # create exceptions based on results
+            print(e)
             # Statistics.update("Resend")
             # Statistics.update("Error")
-            pass
-        Statistics.print_all()
+            #pass
+
+    Statistics.print_all()
 
 
 if __name__ == "__main__":
