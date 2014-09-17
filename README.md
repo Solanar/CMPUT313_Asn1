@@ -3,7 +3,7 @@ CMPUT313_Asn1
 
 Language: Python 3 (at least 3.3)
 
-IDE: Sublime Text 3
+Editor: Sublime Text 3
 
 Sublime Package Control: https://sublime.wbond.net/
 
