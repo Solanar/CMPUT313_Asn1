@@ -20,6 +20,7 @@ Sample of Preferences -> Settings - User
 {
 	"always_show_minimap_viewport": true,
 	"bold_folder_labels": true,
+	"color_scheme": "Packages/zenburn/zenburn.tmTheme",
 	"draw_minimap_border": true,
 	"enable_telemetry": false,
 	"ensure_newline_at_eof_on_save": true,
