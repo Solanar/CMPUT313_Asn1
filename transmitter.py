@@ -2,5 +2,5 @@
 
 class Transmitter():
 
-    def transmit():
-        pass
+    def transmit(input):
+        return input
