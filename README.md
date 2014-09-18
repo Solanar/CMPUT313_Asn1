@@ -1,6 +1,9 @@
 CMPUT313_Asn1
 =============
 
+How to run:<br>
+"python main.py"
+
 Language: Python 3 (at least 3.3)
 
 Editor: Sublime Text 3
