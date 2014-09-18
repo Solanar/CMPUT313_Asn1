@@ -1,8 +1,10 @@
 
 class Statistics():
     Correct = "Correct"
+    Error = "Error"
     statistics_dict = {
         Correct: 0,
+        Error: 0
     }
 
     def update(statistic_type):
