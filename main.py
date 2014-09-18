@@ -2,7 +2,7 @@ import sys
 
 from transmitter import Transmitter
 from simulate_transmission import Simulator
-from receiver import Receiver
+from receiver import Receiver, Error
 from statistics import Statistics
 
 
@@ -23,16 +23,22 @@ def start():
     print()
 
     for i in range(parameter_dict[T]):
-        transmission = Transmitter.transmit()
+        print("Simulating", str(i))
+        transmission = Transmitter.transmit(i)
         simulated_transmission = Simulator.simulate(transmission)
         try:
             Receiver.receive(simulated_transmission)
             Statistics.update(Statistics.Correct)
+            print(Statistics.Correct)
+        except Error:
+            Statistics.update(Statistics.Error)
+            print(Statistics.Error)
         except Exception as e:  # create exceptions based on results
-            print(e)
+            print("Other Exception", e)
             # Statistics.update("Resend")
-            # Statistics.update("Error")
+
             #pass
+    print()
 
     Statistics.print_all()
 
