@@ -2,4 +2,4 @@
 class Simulator():
 
     def simulate(transmission):
-        pass
+        return transmission
