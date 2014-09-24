@@ -10,7 +10,7 @@ class Transmitter():
         # add r checkbits to the F/K sized blocks
         block_size = F/K
         r = math.floor(math.log(block_size,2)) + 1
-        new_block_size = block_size + r
+        new_block_size = int(block_size + r)
 
         # return the new size of the K blocks
         return new_block_size

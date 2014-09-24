@@ -2,13 +2,17 @@
 
 class Receiver():
 
-    def receive(simulated_transmission):
-        if simulated_transmission == 0:  # arbitrary, need to check for error
-            raise Error
-        elif simulated_transmission == 1:
+    def receive(bit_errors):
+
+        # no error, no need to resend
+        if bit_errors == 0:
+            pass
+        # if (k!=0) fix the error using HSBC
+        elif bit_errors == 1:
             raise Exception
-        elif simulated_transmission == 2:
-            pass  # Correct
+        # resend the block
+        elif bit_errors > 1:
+            raise Exception
 
 
 class Error(Exception):
