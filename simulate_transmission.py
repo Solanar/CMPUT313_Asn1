@@ -17,7 +17,6 @@ class Simulator():
             # update seed
             Simulator.seed = randomError
             random.seed(Simulator.seed)
-            print(randomError)
             # if an error occured
             if(randomError < E):
                 bit_errors += 1

@@ -42,40 +42,46 @@ def start():
     # for T trials, repeat the simulation
     for i in range(parameter_dict[T]):
         time = 0
+        trials_received_frames = 0
         # Set the first seed for the simulation
         Simulator.set_seed(parameter_dict[TSeeds][i])
         while (time <= parameter_dict[R]):
             # Transmitter.transmit returns the new size of a block
             new_block_size = Transmitter.transmit(i, parameter_dict[K],
                                                   parameter_dict[F])
-            # Time += F bits + A responseOverhead
+            # Time += F (bits) + A (responseOverhead)
             if (parameter_dict[K] == 0):
-                time += parameter_dict[F] + parameter_dict[A]
+                #time += parameter_dict[F] + parameter_dict[A]
                 handle_block(new_block_size, parameter_dict[E],
                              parameter_dict[K])
-
-            for j in range(0, parameter_dict[K]):
-                time += new_block_size + parameter_dict[A]
-                handle_block(new_block_size, parameter_dict[E],
-                             parameter_dict[K])
+                Statistics.update(Statistics.correctly_received_frames)
+                # Move these to Statistics if you want/need to
+                trials_received_frames += 1
+            else:
+                for j in range(0, parameter_dict[K]):
+                    #time += new_block_size + parameter_dict[A]
+                    handle_block(new_block_size, parameter_dict[E],
+                                 parameter_dict[K])
+                Statistics.update(Statistics.correctly_received_frames)
+                trials_received_frames += 1
+                #print("Time left", time, "Value", Simulator.seed)
         print("Trial number:", i)
+        #TODO remove comment when no longer the same every time
+        print("Trials Received Frames", trials_received_frames)
+        Statistics.append(Statistics.throughput_averages,
+                          (parameter_dict[F] * trials_received_frames) /
+                          parameter_dict[R])
+    # test
+    Statistics.print_ci(parameter_dict[F], parameter_dict[R],
+                        parameter_dict[T])
     print()
 
     Statistics.print_all()
-    # TODO: Determine average number of frame transmitions (total / received)
-    # Determine the throughput ( (F x recieved) / total_time_required)
-    # Determine the confidence interval
-        # Determing mean of averages above (sum(X) \ T)
-        # Determine S.D. s = root(sum(x-X)^2 / (T-1))
-        # Determine C.I. from T-Distribution (t = 2.776 gives us % C.I.)
-            #  c = X [+-] 2.776(s/root(T))
-    # Graph the shite out of it (throughput vs E for differing values of K)
-    # Tables where possible (at least w/ averages and C.I.)
-    # Discussion of the results with varied inputs (possibly ideal values?)
 
 
 def handle_block(new_block_size, E, K):
     while(1):
+        time += new_block_size + parameter_dict[A]
         # Simulator.simulate returns the number of bit erors in each block
         bit_errors = Simulator.simulate(new_block_size, E)
         Statistics.update(Statistics.total_transmitions)
