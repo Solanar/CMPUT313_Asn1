@@ -8,6 +8,7 @@ class Statistics():
     block_errors = "Block Errors"
     total_transmitions = "Total Block Transmitions"
     correctly_received_frames = "Correctly Received Frames"
+    correctly_received_blocks = "Correctly Received Blocks"
     throughput_averages = "Throughput averages"
     statistics_dict = {
         no_error: 0,
@@ -16,6 +17,7 @@ class Statistics():
         block_errors: 0,
         total_transmitions: 0,
         correctly_received_frames: 0,
+        correctly_received_blocks: 0,
         throughput_averages: []
     }
 
@@ -31,12 +33,17 @@ class Statistics():
             print(name, "\t=", num)
         Statistics.print_average()
 
-    # Average Frame Transmitions
+    # Average block Transmitions
     def print_average():
-        print("Average Frame Transmitions: (this doesnt feel right)")
-        print(Statistics.statistics_dict[Statistics.total_transmitions] /
-              Statistics.statistics_dict[Statistics.correctly_received_frames],
-              "sent/received")
+        print("Average Block Transmitions:")
+        if(Statistics.statistics_dict
+           [Statistics.correctly_received_blocks] != 0):
+            print(Statistics.statistics_dict[Statistics.total_transmitions] /
+                  Statistics.statistics_dict
+                  [Statistics.correctly_received_blocks],
+                  "sent/received")
+        else:
+            print("No blocks received. No average available.")
 
     # Total throughput after all T trials
     def print_throughput(F, R, T):

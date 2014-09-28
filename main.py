@@ -46,36 +46,38 @@ def start():
         trials_received_frames = 0
         # Set the first seed for the simulation
         Simulator.set_seed(parameter_dict[TSeeds][i])
+        # Transmitter.transmit returns the new size of a block
+        new_block_size = Transmitter.transmit(i, parameter_dict[K],
+                                              parameter_dict[F])
         while (time <= parameter_dict[R]):
-            # Transmitter.transmit returns the new size of a block
-            new_block_size = Transmitter.transmit(i, parameter_dict[K],
-                                                  parameter_dict[F])
-            # Time += F (bits) + A (responseOverhead)
+            # set the number of blocks to be transmitted in this frame
+            transmitions = parameter_dict[K]
             if (parameter_dict[K] == 0):
-                # First transmition
-                time += parameter_dict[F] + parameter_dict[A]
-                retransmitions = handle_block(new_block_size,
-                                              parameter_dict[E],
-                                              parameter_dict[K])
-                # Retransmitions
-                # Note: possible to transmit last block even after time is up
-                time += (parameter_dict[F] +
-                         parameter_dict[A]) * retransmitions
+                transmitions = 1
+            # For K blocks (or 1 if K = 0), simulate the transmition
+            j = 0
+            while j < transmitions:
+                # failure = 0 if block was transmitted successfully
+                failure = handle_block(new_block_size,
+                                       parameter_dict[E],
+                                       parameter_dict[K])
+                # increment time by number of bits and and response overhead
+                time += (parameter_dict[F]/transmitions) + parameter_dict[A]
+                # if out of time, stop transmitting blocks
+                if(time > parameter_dict[R]):
+                    break
+                # if block failed, decrement counter j (retry)
+                if(failure > 0):
+                    j -= 1
+                else:
+                    pass
+                # increment to the next block
+                j += 1
+            # if transmitions in this frame completed before time ran out
+            if(time <= parameter_dict[R]):
                 Statistics.update(Statistics.correctly_received_frames)
-                # Move these to Statistics if you want/need to
                 trials_received_frames += 1
-            else:
-                for j in range(0, parameter_dict[K]):
-                    time += new_block_size + parameter_dict[A]
-                    retransmitions = handle_block(new_block_size,
-                                                  parameter_dict[E],
-                                                  parameter_dict[K])
-                    time += (parameter_dict[F] +
-                             parameter_dict[A]) * retransmitions
 
-                Statistics.update(Statistics.correctly_received_frames)
-                trials_received_frames += 1
-                #print("Time left", time, "Value", Simulator.seed)
         print("Trial number:", i)
         #TODO remove comment when no longer the same every time
         print("Trials Received Frames", trials_received_frames)
@@ -91,25 +93,27 @@ def start():
 
 
 def handle_block(new_block_size, E, K):
-    times_retransmitted = 0
-    while(1):
-        # Simulator.simulate returns the number of bit erors in each block
-        bit_errors = Simulator.simulate(new_block_size, E)
-        Statistics.update(Statistics.total_transmitions)
-        if(bit_errors != 0):
-            Statistics.update(Statistics.block_errors)
-        try:
-            Receiver.receive(bit_errors)
-            Statistics.update(Statistics.no_error)
-            return times_retransmitted
-        except OneBitError:
-            Statistics.update(Statistics.one_bit_error)
-            if (K != 0):
-                # Assume: Fixing the error requires 0 time units
-                return times_retransmitted
-        except MultipleBitErrors:
-            Statistics.update(Statistics.multiple_bit_errors)
-            times_retransmitted += 1
+
+    # Simulator.simulate returns the number of bit erors in each block
+    bit_errors = Simulator.simulate(new_block_size, E)
+    Statistics.update(Statistics.total_transmitions)
+    if(bit_errors != 0):
+        Statistics.update(Statistics.block_errors)
+    try:
+        Receiver.receive(bit_errors)
+        Statistics.update(Statistics.no_error)
+        Statistics.update(Statistics.correctly_received_blocks)
+        return 0
+    except OneBitError:
+        Statistics.update(Statistics.one_bit_error)
+        if (K != 0):
+            Statistics.update(Statistics.correctly_received_blocks)
+            # Assume: Fixing the error requires 0 time units
+            return 0
+        return bit_errors
+    except MultipleBitErrors:
+        Statistics.update(Statistics.multiple_bit_errors)
+        return bit_errors
 
 if __name__ == "__main__":
     start()
