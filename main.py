@@ -7,6 +7,7 @@ from statistics import Statistics
 
 
 def start():
+
     A = 'A'  # Response overhead
     K = 'K'  # Number of blocks frame is broken into
     F = 'F'  # Frame size (in bits)
@@ -51,17 +52,27 @@ def start():
                                                   parameter_dict[F])
             # Time += F (bits) + A (responseOverhead)
             if (parameter_dict[K] == 0):
-                #time += parameter_dict[F] + parameter_dict[A]
-                handle_block(new_block_size, parameter_dict[E],
-                             parameter_dict[K])
+                # First transmition
+                time += parameter_dict[F] + parameter_dict[A]
+                retransmitions = handle_block(new_block_size,
+                                              parameter_dict[E],
+                                              parameter_dict[K])
+                # Retransmitions
+                # Note: possible to transmit last block even after time is up
+                time += (parameter_dict[F] +
+                         parameter_dict[A]) * retransmitions
                 Statistics.update(Statistics.correctly_received_frames)
                 # Move these to Statistics if you want/need to
                 trials_received_frames += 1
             else:
                 for j in range(0, parameter_dict[K]):
-                    #time += new_block_size + parameter_dict[A]
-                    handle_block(new_block_size, parameter_dict[E],
-                                 parameter_dict[K])
+                    time += new_block_size + parameter_dict[A]
+                    retransmitions = handle_block(new_block_size,
+                                                  parameter_dict[E],
+                                                  parameter_dict[K])
+                    time += (parameter_dict[F] +
+                             parameter_dict[A]) * retransmitions
+
                 Statistics.update(Statistics.correctly_received_frames)
                 trials_received_frames += 1
                 #print("Time left", time, "Value", Simulator.seed)
@@ -80,8 +91,8 @@ def start():
 
 
 def handle_block(new_block_size, E, K):
+    times_retransmitted = 0
     while(1):
-        time += new_block_size + parameter_dict[A]
         # Simulator.simulate returns the number of bit erors in each block
         bit_errors = Simulator.simulate(new_block_size, E)
         Statistics.update(Statistics.total_transmitions)
@@ -90,17 +101,15 @@ def handle_block(new_block_size, E, K):
         try:
             Receiver.receive(bit_errors)
             Statistics.update(Statistics.no_error)
-            #print(Statistics.no_error)
-            break
+            return times_retransmitted
         except OneBitError:
             Statistics.update(Statistics.one_bit_error)
-            #print(Statistics.one_bit_error)
             if (K != 0):
-                # fix error (add time units?)
-                break
+                # Assume: Fixing the error requires 0 time units
+                return times_retransmitted
         except MultipleBitErrors:
             Statistics.update(Statistics.multiple_bit_errors)
-            #print(Statistics.multiple_bit_errors)
+            times_retransmitted += 1
 
 if __name__ == "__main__":
     start()
