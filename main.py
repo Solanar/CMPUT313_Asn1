@@ -2,18 +2,18 @@ import sys
 
 from transmitter import Transmitter
 from simulate_transmission import Simulator
-from receiver import Receiver, Error
+from receiver import Receiver, OneBitError, MultipleBitErrors
 from statistics import Statistics
 
 
 def start():
-    A = 'A'  # Feedback time in bit_time_units
+    A = 'A'  # Response overhead
     K = 'K'  # Number of blocks frame is broken into
     F = 'F'  # Frame size (in bits)
     E = 'E'  # Probability of a bit error
     R = 'R'  # Simulation length in bit_time_units
     T = 'T'  # Trials
-    # Todo: also accept the T seeds for the trial
+    TSeeds = "T Seeds"
 
     parameter_dict = {
         A: 500,
@@ -21,7 +21,8 @@ def start():
         F: 4000,
         E: 0.00015,
         R: 400000,
-        T: 5
+        T: 5,
+        TSeeds: []
     }
     # fill parameter_dict with arguments
     parameter_dict[A] = int(sys.argv[1])
@@ -30,6 +31,9 @@ def start():
     parameter_dict[E] = float(sys.argv[4])
     parameter_dict[R] = int(sys.argv[5])
     parameter_dict[T] = int(sys.argv[6])
+    for i in range(parameter_dict[T]):
+        parameter_dict[TSeeds].append(int(sys.argv[6+i+1]))
+
     print("Parameters:")
     for name, value in parameter_dict.items():
         print("Name:", name, "\tValue:", value)
@@ -37,32 +41,24 @@ def start():
 
     # for T trials, repeat the simulation
     for i in range(parameter_dict[T]):
-        print("Simulating", str(i))
-        # Transmitter.transmit returns the new size of a block
-        new_block_size = Transmitter.transmit(i, parameter_dict[K],
-                                parameter_dict[F])
+        time = 0
+        # Set the first seed for the simulation
+        Simulator.set_seed(parameter_dict[TSeeds][i])
+        while (time <= parameter_dict[R]):
+            # Transmitter.transmit returns the new size of a block
+            new_block_size = Transmitter.transmit(i, parameter_dict[K],
+                                                  parameter_dict[F])
+            # Time += F bits + A responseOverhead
+            if (parameter_dict[K] == 0):
+                time += parameter_dict[F] + parameter_dict[A]
+                handle_block(new_block_size, parameter_dict[E],
+                             parameter_dict[K])
 
-        block_errors = 0
-        # Simulator.simulate returns the number of bit erors in each block
-        for j in range(0, parameter_dict[K]):
-            bit_errors = Simulator.simulate(new_block_size, parameter_dict[E])
-            if(bit_errors != 0):
-                block_errors += 1
-                # TODO: Resend the block at the receiver
-        print(block_errors,"of", parameter_dict[K],"blocks transmited an error")
-
-        try:
-            Receiver.receive(bit_errors)
-            Statistics.update(Statistics.Correct)
-            print(Statistics.Correct)
-        except Error:
-            Statistics.update(Statistics.Error)
-            print(Statistics.Error)
-        except Exception as e:  # create exceptions based on results
-            print("Other Exception", e)
-            # Statistics.update("Resend")
-
-            #pass
+            for j in range(0, parameter_dict[K]):
+                time += new_block_size + parameter_dict[A]
+                handle_block(new_block_size, parameter_dict[E],
+                             parameter_dict[K])
+        print("Trial number:", i)
     print()
 
     Statistics.print_all()
@@ -77,6 +73,28 @@ def start():
     # Tables where possible (at least w/ averages and C.I.)
     # Discussion of the results with varied inputs (possibly ideal values?)
 
+
+def handle_block(new_block_size, E, K):
+    while(1):
+        # Simulator.simulate returns the number of bit erors in each block
+        bit_errors = Simulator.simulate(new_block_size, E)
+        Statistics.update(Statistics.total_transmitions)
+        if(bit_errors != 0):
+            Statistics.update(Statistics.block_errors)
+        try:
+            Receiver.receive(bit_errors)
+            Statistics.update(Statistics.no_error)
+            #print(Statistics.no_error)
+            break
+        except OneBitError:
+            Statistics.update(Statistics.one_bit_error)
+            #print(Statistics.one_bit_error)
+            if (K != 0):
+                # fix error (add time units?)
+                break
+        except MultipleBitErrors:
+            Statistics.update(Statistics.multiple_bit_errors)
+            #print(Statistics.multiple_bit_errors)
 
 if __name__ == "__main__":
     start()

@@ -9,11 +9,15 @@ class Receiver():
             pass
         # if (k!=0) fix the error using HSBC
         elif bit_errors == 1:
-            raise Exception
+            raise OneBitError
         # resend the block
         elif bit_errors > 1:
-            raise Exception
+            raise MultipleBitErrors
 
 
-class Error(Exception):
+class OneBitError(Exception):
+    pass
+
+
+class MultipleBitErrors(Exception):
     pass
