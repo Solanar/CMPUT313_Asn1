@@ -44,6 +44,8 @@ def start():
     for i in range(parameter_dict[T]):
         time = 0
         trials_received_frames = 0
+        trials_received_blocks = 0
+        trials_failed_blocks = 0
         # Set the first seed for the simulation
         Simulator.set_seed(parameter_dict[TSeeds][i])
         # Transmitter.transmit returns the new size of a block
@@ -69,8 +71,9 @@ def start():
                 # if block failed, decrement counter j (retry)
                 if(failure > 0):
                     j -= 1
+                    trials_failed_blocks += 1
                 else:
-                    pass
+                    trials_received_blocks += 1
                 # increment to the next block
                 j += 1
             # if transmitions in this frame completed before time ran out
@@ -78,18 +81,25 @@ def start():
                 Statistics.update(Statistics.correctly_received_frames)
                 trials_received_frames += 1
 
-        print("Trial number:", i)
-        #TODO remove comment when no longer the same every time
-        print("Trials Received Frames", trials_received_frames)
+        #print("Trial number:", i)
+        # Assume: Take all R time units into account even if in last frame
         Statistics.append(Statistics.throughput_averages,
                           (parameter_dict[F] * trials_received_frames) /
                           parameter_dict[R])
-    # test
-    Statistics.print_ci(parameter_dict[F], parameter_dict[R],
-                        parameter_dict[T])
-    print()
+        # Assume: Take all blocks into account, even if in last frame
+        Statistics.append(Statistics.block_averages,
+                          (trials_received_blocks + trials_failed_blocks) /
+                          (trials_received_blocks))
 
+    # Call Print Statements
+    print()
     Statistics.print_all()
+    print()
+    print("----------------------------------------------")
+    print_input(sys.argv)
+    Statistics.set_final_values(parameter_dict[F], parameter_dict[R])
+    Statistics.print_block_ci()
+    Statistics.print_throughput_ci()
 
 
 def handle_block(new_block_size, E, K):
@@ -114,6 +124,17 @@ def handle_block(new_block_size, E, K):
     except MultipleBitErrors:
         Statistics.update(Statistics.multiple_bit_errors)
         return bit_errors
+
+
+def print_input(args):
+    # Remove the first "main.py" element
+    args.pop(0)
+    input_string = ""
+    for arg in args:
+        input_string += " " + str(arg)
+    # Remove leading whitespace
+    input_string = input_string[1:]
+    print(input_string)
 
 if __name__ == "__main__":
     start()
