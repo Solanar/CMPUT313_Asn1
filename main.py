@@ -12,7 +12,7 @@ def start():
     K = 'K'  # Number of blocks frame is broken into
     F = 'F'  # Frame size (in bits)
     E = 'E'  # Probability of a bit error
-    R = 'R'  # Simulation length in bit_time_units
+    R = 'R'  # Simulation length in bit_trials_time_units
     T = 'T'  # Trials
     TSeeds = "T Seeds"
 
@@ -42,7 +42,7 @@ def start():
 
     # for T trials, repeat the simulation
     for i in range(parameter_dict[T]):
-        time = 0
+        trials_time = 0
         trials_received_frames = 0
         trials_received_blocks = 0
         trials_failed_blocks = 0
@@ -51,7 +51,7 @@ def start():
         # Transmitter.transmit returns the new size of a block
         new_block_size = Transmitter.transmit(i, parameter_dict[K],
                                               parameter_dict[F])
-        while (time <= parameter_dict[R]):
+        while (trials_time <= parameter_dict[R]):
             # set the number of blocks to be transmitted in this frame
             transmitions = parameter_dict[K]
             if (parameter_dict[K] == 0):
@@ -63,10 +63,12 @@ def start():
                 failure = handle_block(new_block_size,
                                        parameter_dict[E],
                                        parameter_dict[K])
-                # increment time by number of bits and and response overhead
-                time += (parameter_dict[F]/transmitions) + parameter_dict[A]
-                # if out of time, stop transmitting blocks
-                if(time > parameter_dict[R]):
+                # increment trials_time by number of bits and and
+                # response overhead
+                trials_time += (parameter_dict[F] /
+                                transmitions) + parameter_dict[A]
+                # if out of trials_time, stop transmitting blocks
+                if(trials_time > parameter_dict[R]):
                     break
                 # if block failed, decrement counter j (retry)
                 if(failure > 0):
@@ -77,12 +79,13 @@ def start():
                 # increment to the next block
                 j += 1
             # if transmitions in this frame completed before time ran out
-            if(time <= parameter_dict[R]):
+            if(trials_time <= parameter_dict[R]):
                 Statistics.update(Statistics.correctly_received_frames)
                 trials_received_frames += 1
 
         #print("Trial number:", i)
-        # Assume: Take all R time units into account even if in last frame
+        # Assume: Take all R trials_time units into account
+        # even if in last frame
         Statistics.append(Statistics.throughput_averages,
                           (parameter_dict[F] * trials_received_frames) /
                           parameter_dict[R])
@@ -93,13 +96,14 @@ def start():
 
     # Call Print Statements
     print()
-    Statistics.print_all()
-    print()
     print("----------------------------------------------")
     print_input(sys.argv)
     Statistics.set_final_values(parameter_dict[F], parameter_dict[R])
     Statistics.print_block_ci()
     Statistics.print_throughput_ci()
+    print("----------------------------------------------")
+    print()
+    Statistics.print_all()
 
 
 def handle_block(new_block_size, E, K):
@@ -118,7 +122,7 @@ def handle_block(new_block_size, E, K):
         Statistics.update(Statistics.one_bit_error)
         if (K != 0):
             Statistics.update(Statistics.correctly_received_blocks)
-            # Assume: Fixing the error requires 0 time units
+            # Assume: Fixing the error requires 0 trials_time units
             return 0
         return bit_errors
     except MultipleBitErrors:
