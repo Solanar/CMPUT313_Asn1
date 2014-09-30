@@ -3,7 +3,7 @@ import math
 
 class Transmitter():
 
-    def transmit(input, K, F):
+    def transmit(K, F):
         # special case, no HSBC applied
         if(K == 0):
             return F

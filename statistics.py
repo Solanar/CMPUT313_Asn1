@@ -10,7 +10,11 @@ class Statistics():
     correctly_received_frames = "Correctly Received Frames"
     correctly_received_blocks = "Correctly Received Blocks"
     block_averages = "Block Averages"
+    frame_averages = "Frame Averages"
     throughput_averages = "Throughput Averages"
+    total_frames = "Total Frames"
+    final_frame_average = "Frinal Frame Average"
+    final_frame_ci = "Final Frame Confidence Interval"
     final_block_average = "Final Block Average"
     final_block_ci = "Final Block Confidence Interval"
     final_throughput = "Final Throughput"
@@ -21,11 +25,15 @@ class Statistics():
         multiple_bit_errors: 0,
         block_errors: 0,
         total_transmitions: 0,
+        total_frames: 0,
         correctly_received_frames: 0,
         correctly_received_blocks: 0,
         block_averages: [],
+        frame_averages: [],
         throughput_averages: [],
 
+        final_frame_average: 0,
+        final_frame_ci: 0,
         final_block_average: 0,
         final_block_ci: '',
         final_throughput: 0,
@@ -41,19 +49,20 @@ class Statistics():
     def set_final_values(F, R):
         # 2.776 is the t-distribution value with 95% confidence
         confidence_value = 2.776
-        T = len(Statistics.statistics_dict[Statistics.block_averages])
+        ## FRAMES ##
+        T = len(Statistics.statistics_dict[Statistics.frame_averages])
         if(Statistics.statistics_dict
-           [Statistics.correctly_received_blocks] != 0):
-            average = Statistics.statistics_dict[Statistics.total_transmitions] / Statistics.statistics_dict[Statistics.correctly_received_blocks]
-            Statistics.statistics_dict[Statistics.final_block_average] = average
+           [Statistics.correctly_received_frames] != 0):
+            average = Statistics.statistics_dict[Statistics.total_frames] / Statistics.statistics_dict[Statistics.correctly_received_frames]
+            Statistics.statistics_dict[Statistics.final_frame_average] = average
         else:
-            Statistics.statistics_dict[Statistics.final_block_average] = 0
+            Statistics.statistics_dict[Statistics.final_frame_average] = 0
 
         mean_of_averages = (math.fsum(Statistics.statistics_dict
-                                      [Statistics.block_averages]) / T)
+                                      [Statistics.frame_averages]) / T)
         SSD = 0  # Sum of the Squared Distances
         for trial_average in (Statistics.statistics_dict
-                              [Statistics.block_averages]):
+                              [Statistics.frame_averages]):
             SSD += math.pow(trial_average - mean_of_averages, 2)
 
         std_dev = math.sqrt(SSD/(T-1))
@@ -62,8 +71,31 @@ class Statistics():
         ci_high = str(mean_of_averages + variance)
         final_string = "(" + ci_low + ", " + ci_high + ")"
 
-        Statistics.statistics_dict[Statistics.final_block_ci] = final_string
+        Statistics.statistics_dict[Statistics.final_frame_ci] = final_string
+        ### BLOCK ##
+        #T = len(Statistics.statistics_dict[Statistics.block_averages])
+        #if(Statistics.statistics_dict
+        #   [Statistics.correctly_received_blocks] != 0):
+        #    average = Statistics.statistics_dict[Statistics.total_transmitions] / Statistics.statistics_dict[Statistics.correctly_received_blocks]
+        #    Statistics.statistics_dict[Statistics.final_block_average] = average
+        #else:
+        #    Statistics.statistics_dict[Statistics.final_block_average] = 0
 
+        #mean_of_averages = (math.fsum(Statistics.statistics_dict
+        #                              [Statistics.block_averages]) / T)
+        #SSD = 0  # Sum of the Squared Distances
+        #for trial_average in (Statistics.statistics_dict
+        #                      [Statistics.block_averages]):
+        #    SSD += math.pow(trial_average - mean_of_averages, 2)
+
+        #std_dev = math.sqrt(SSD/(T-1))
+        #variance = (confidence_value * (std_dev / math.sqrt(T)))
+        #ci_low = str(mean_of_averages - variance)
+        #ci_high = str(mean_of_averages + variance)
+        #final_string = "(" + ci_low + ", " + ci_high + ")"
+
+        #Statistics.statistics_dict[Statistics.final_block_ci] = final_string
+        ## THROUGHPUT ##
         T = len(Statistics.statistics_dict[Statistics.throughput_averages])
         throughput = ((F * Statistics.statistics_dict
                       [Statistics.correctly_received_frames]) / (R*T))
@@ -90,9 +122,14 @@ class Statistics():
             print(name, "\t=", num)
 
     # Confidence Interval for throughput
-    def print_block_ci():
-        print(Statistics.statistics_dict[Statistics.final_block_average],
-              Statistics.statistics_dict[Statistics.final_block_ci])
+    def print_frame_ci():
+        print(Statistics.statistics_dict[Statistics.final_frame_average],
+              Statistics.statistics_dict[Statistics.final_frame_ci])
+
+    ## Confidence Interval for throughput
+    #def print_block_ci():
+    #    print(Statistics.statistics_dict[Statistics.final_block_average],
+    #          Statistics.statistics_dict[Statistics.final_block_ci])
 
     # Confidence Interval for throughput
     def print_throughput_ci():
