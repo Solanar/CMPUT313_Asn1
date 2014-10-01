@@ -1,6 +1,9 @@
 CMPUT313_Asn1
 =============
 
+Andrew Charles
+Jake Brand
+
 How to run:<br>
 "python main.py"
 
