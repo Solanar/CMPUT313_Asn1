@@ -6,18 +6,23 @@ function run() {
     python main.py 500 50 4000 $1 400000 5 1534546 2133323 377 456548 59998 >> output.txt
     python main.py 500 400 4000 $1 400000 5 1534546 2133323 377 456548 59998 >> output.txt
     python main.py 500 4000 4000 $1 400000 5 1534546 2133323 377 456548 59998 >> output.txt
-    
+
 }
 
 echo "Start"
 
-run 0.00001
-run 0.0001 
+run 0.00025
 run 0.0005
+run 0.000625
+run 0.00075
+run 0.000875
 run 0.001
+run 0.00175
+run 0.0025
+run 0.00375
 run 0.005
+run 0.00625
+run 0.0075
 run 0.01
-run 0.1
-run 1.0
 
 echo "End"
