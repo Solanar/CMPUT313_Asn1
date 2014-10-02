@@ -19,6 +19,8 @@ class Statistics():
     #final_block_ci = "Final Block Confidence Interval"
     final_throughput = "Final Throughput"
     final_throughput_ci = "Final Throughput Confidence Interval"
+    total_time = "Total Time"
+
     statistics_dict = {
         no_error: 0,
         one_bit_error: 0,
@@ -31,13 +33,13 @@ class Statistics():
         #block_averages: [],
         frame_averages: [],
         throughput_averages: [],
-
         final_frame_average: 0,
         final_frame_ci: 0,
         #final_block_average: 0,
         #final_block_ci: '',
         final_throughput: 0,
-        final_throughput_ci: ''
+        final_throughput_ci: '',
+        total_time: 0
     }
 
     def append(statistic_type, value):
@@ -52,26 +54,24 @@ class Statistics():
         ## FRAMES ##
         stat_dict = Statistics.statistics_dict
         T = len(stat_dict[Statistics.frame_averages])
-        if(stat_dict
-           [Statistics.correctly_received_frames] != 0):
-            average = \
-                stat_dict[Statistics.total_frames] \
-                / stat_dict[Statistics.correctly_received_frames]
+        if(stat_dict[Statistics.correctly_received_frames] != 0):
+            average = (stat_dict[Statistics.total_frames]
+                       / stat_dict[Statistics.correctly_received_frames])
             stat_dict[Statistics.final_frame_average] = average
         else:
             stat_dict[Statistics.final_frame_average] = 0
 
-        mean_of_averages = (math.fsum(stat_dict
-                                      [Statistics.frame_averages]) / T)
+        # mean_of_averages = (math.fsum(stat_dict
+        #                               [Statistics.frame_averages]) / T)
         SSD = 0  # Sum of the Squared Distances
-        for trial_average in (stat_dict
-                              [Statistics.frame_averages]):
-            SSD += math.pow(trial_average - mean_of_averages, 2)
+        for trial_average in (stat_dict[Statistics.frame_averages]):
+            SSD += math.pow(trial_average -
+                            stat_dict[Statistics.final_frame_average], 2)
 
         std_dev = math.sqrt(SSD / (T - 1))
         variance = (confidence_value * (std_dev / math.sqrt(T)))
-        ci_low = str(mean_of_averages - variance)
-        ci_high = str(mean_of_averages + variance)
+        ci_low = str(stat_dict[Statistics.final_frame_average] - variance)
+        ci_high = str(stat_dict[Statistics.final_frame_average] + variance)
         final_string = "(" + ci_low + ", " + ci_high + ")"
 
         stat_dict[Statistics.final_frame_ci] = final_string
@@ -101,21 +101,22 @@ class Statistics():
         #stat_dict[Statistics.final_block_ci] = final_string
         ## THROUGHPUT ##
         T = len(stat_dict[Statistics.throughput_averages])
+        # use total_time instead of R * T
         throughput = ((F * stat_dict[Statistics.correctly_received_frames])
-                      / (R * T))
+                      / (stat_dict[Statistics.total_time]))
         stat_dict[Statistics.final_throughput] = throughput
 
-        mean_of_averages = (math.fsum(stat_dict
-                                      [Statistics.throughput_averages]) / T)
+        # mean_of_averages = (math.fsum(stat_dict
+        #                               [Statistics.throughput_averages]) / T)
         SSD = 0  # Sum of the Squared Distances
-        for trial_average in (stat_dict
-                              [Statistics.throughput_averages]):
-            SSD += math.pow(trial_average - mean_of_averages, 2)
+        for trial_average in (stat_dict[Statistics.throughput_averages]):
+            SSD += math.pow(trial_average -
+                            stat_dict[Statistics.final_throughput], 2)
 
         std_dev = math.sqrt(SSD / (T - 1))
         variance = (confidence_value * (std_dev / math.sqrt(T)))
-        ci_low = str(mean_of_averages - variance)
-        ci_high = str(mean_of_averages + variance)
+        ci_low = str(stat_dict[Statistics.final_throughput] - variance)
+        ci_high = str(stat_dict[Statistics.final_throughput] + variance)
         final_string = "(" + ci_low + ", " + ci_high + ")"
         stat_dict[Statistics.final_throughput_ci] = final_string
 
