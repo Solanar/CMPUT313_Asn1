@@ -3,7 +3,6 @@
 class Receiver():
 
     def receive(bit_errors):
-
         # no error, no need to resend
         if bit_errors == 0:
             pass
