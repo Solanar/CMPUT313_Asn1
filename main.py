@@ -38,13 +38,14 @@ def start():
         trials_time = 0
         trials_received_frames = 0
         trials_failed_frames = 0
-        trials_received_blocks = 0
-        trials_failed_blocks = 0
 
         # Set the first seed for the simulation
         Simulator.set_seed(parameter_dict[TSeeds][i])
 
         while (trials_time <= parameter_dict[R]):
+            trials_received_blocks = 0  # new frame
+            trials_failed_blocks = 0    # new frame
+
             # set the number of blocks to be transmitted in this frame
             transmissions = parameter_dict[K]
 
@@ -59,17 +60,19 @@ def start():
                                              parameter_dict[K])
 
                 # record block success or failure
-                if(block_failure > 0):
+                if (block_failure > 0):
                     trials_failed_blocks += 1
                 else:
                     trials_received_blocks += 1
 
             # set trials_time to number of bits and response overhead
-            trials_time += parameter_dict[F] + parameter_dict[A]
+            trials_time += (parameter_dict[F] +
+                            (parameter_dict[K] * Transmitter.r)
+                            + parameter_dict[A])
             # update number of transmitted frames
             Statistics.update(Statistics.total_frames)
             # frame failed, resend the frame
-            if(trials_failed_blocks > 1):
+            if(trials_failed_blocks >= 1):
                 trials_failed_frames += 1
             # the last frame being sent (no longer needed) see forums
             #elif(trials_time > parameter_dict[R]):
@@ -93,7 +96,7 @@ def start():
             # Assume: Take all frames into account, even last frame
             Statistics.append(Statistics.frame_averages,
                               (trials_received_frames + trials_failed_frames) /
-                              (trials_received_frames))
+                              trials_received_frames)
         else:
             Statistics.append(Statistics.frame_averages, 0)
 
@@ -106,6 +109,9 @@ def start():
         # else:
         #     Statistics.append(Statistics.block_averages, 0)
 
+        # Add to total time
+        Statistics.statistics_dict[Statistics.total_time] += trials_time
+
     # Call Print Statements
     #a print()
     #a print("----------------------------------------------")
@@ -113,6 +119,17 @@ def start():
     Statistics.set_final_values(parameter_dict[F], parameter_dict[R])
     Statistics.print_frame_ci()
     Statistics.print_throughput_ci()
+    # stat_dict = Statistics.statistics_dict
+    # ci_high = stat_dict[Statistics.final_frame_ci].split()[1][:-1]
+    # print(parameter_dict[E],
+    #       parameter_dict[K],
+    #       Statistics.statistics_dict[Statistics.final_frame_average],
+    #       ci_high)
+    # ci_high = stat_dict[Statistics.final_throughput_ci].split()[1][:-1]
+    # print(parameter_dict[E],
+    #       parameter_dict[K],
+    #       Statistics.statistics_dict[Statistics.final_throughput],
+    #       ci_high)
     #a print("----------------------------------------------")
     #Statistics.print_block_ci()
     #a print()
