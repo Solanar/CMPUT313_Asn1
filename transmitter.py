@@ -19,7 +19,6 @@ class Transmitter():
 
         Transmitter.r = new_r
 
-        #r = math.floor(math.log(block_size, 2)) + 1
         new_block_size = int(block_size + new_r) + 1  # parity bit
 
         # return the new size of the K blocks
