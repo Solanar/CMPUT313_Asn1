@@ -100,15 +100,6 @@ def start():
         else:
             Statistics.append(Statistics.frame_averages, 0)
 
-        # if(trials_received_blocks != 0):
-        #     # Assume: Take all blocks into account, even if in last frame
-        #     Statistics.append(Statistics.block_averages,
-        #                       (trials_received_blocks +
-                                 # trials_failed_blocks) /
-        #                       (trials_received_blocks))
-        # else:
-        #     Statistics.append(Statistics.block_averages, 0)
-
         # Add to total time
         Statistics.statistics_dict[Statistics.total_time] += trials_time
 
@@ -129,7 +120,8 @@ def start():
     # print(parameter_dict[E],
     #       parameter_dict[K],
     #       Statistics.statistics_dict[Statistics.final_throughput],
-    #       ci_high)
+    #       str(float(ci_high) -
+    #           Statistics.statistics_dict[Statistics.final_throughput]))
     #a print("----------------------------------------------")
     #Statistics.print_block_ci()
     #a print()
